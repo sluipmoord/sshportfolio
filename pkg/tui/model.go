@@ -6,16 +6,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type Model struct {
-	Projects []string
-	Cursor   int
+type Portfolio struct {
+	Pages  []string
+	Cursor int
 }
 
-func (m Model) Init() tea.Cmd {
+func (m Portfolio) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Portfolio) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -26,8 +26,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Cursor--
 			}
 		case "down":
-			if m.Cursor < len(m.Projects)-1 {
+			if m.Cursor < len(m.Pages)-1 {
 				m.Cursor++
+			}
+		case "enter":
+			return m, func() tea.Msg {
+				return fmt.Sprintf("You selected: %s", m.Pages[m.Cursor])
 			}
 		}
 	}
@@ -35,15 +39,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) View() string {
+func (m Portfolio) View() string {
 	view := "My Portfolio\n\n"
-	for i, project := range m.Projects {
+	for i, page := range m.Pages {
 		cursor := " "
 		if m.Cursor == i {
 			cursor = ">"
 		}
-		view += fmt.Sprintf("%s %s\n", cursor, project)
+		view += fmt.Sprintf("%s %s\n", cursor, page)
 	}
-	view += "\nPress q to quit."
+	view += "\nUse up/down to navigate, enter to select, and q to quit."
 	return view
 }
