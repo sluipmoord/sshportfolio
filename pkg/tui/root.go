@@ -4,7 +4,8 @@ import (
 	"context"
 	"log/slog"
 	"math"
-	"sshportfolio/pkg/tui/theme"
+
+	"github.com/sluipmoord/sshportfolio/pkg/tui/theme"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -26,6 +27,14 @@ const (
 	small
 	medium
 	large
+)
+
+// contextKey is a custom type for context keys to avoid collisions
+type contextKey string
+
+// Context keys
+const (
+	clientIPKey contextKey = "client_ip"
 )
 
 type model struct {
@@ -54,7 +63,7 @@ func NewModel(
 	command []string,
 ) (tea.Model, error) {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "client_ip", clientIP)
+	ctx = context.WithValue(ctx, clientIPKey, clientIP)
 
 	return model{
 		renderer:    renderer,
@@ -72,7 +81,7 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	slog.Info("Update", "msg", msg)
+	slog.Debug("Update", "msg", msg)
 
 	cmds := []tea.Cmd{}
 	switch msg := msg.(type) {

@@ -1,4 +1,4 @@
-module sshportfolio
+module github.com/sluipmoord/sshportfolio
 
 go 1.23.0
 

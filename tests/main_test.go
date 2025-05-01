@@ -2,8 +2,9 @@ package tests
 
 import (
 	"os"
-	"sshportfolio/pkg/tui"
 	"testing"
+
+	"github.com/sluipmoord/sshportfolio/pkg/tui"
 
 	"github.com/charmbracelet/lipgloss"
 )

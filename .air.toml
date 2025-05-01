@@ -3,7 +3,7 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-args_bin = []
+args_bin = ["-loglevel", "debug"]
 bin = "./tmp/ssh"
 cmd = "go build -o ./tmp/ssh ./cmd/ssh"
 delay = 1000

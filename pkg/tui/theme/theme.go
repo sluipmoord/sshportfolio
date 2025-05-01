@@ -95,7 +95,7 @@ func (b Theme) Accent() lipgloss.TerminalColor {
 }
 
 func (b Theme) Base() lipgloss.Style {
-	return b.base.Copy()
+	return b.base
 }
 
 func (b Theme) TextBody() lipgloss.Style {

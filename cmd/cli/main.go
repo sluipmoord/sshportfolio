@@ -4,26 +4,34 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"sshportfolio/pkg/tui"
+
+	"github.com/sluipmoord/sshportfolio/pkg/config"
+	"github.com/sluipmoord/sshportfolio/pkg/tui"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 func main() {
-	log, err := os.Create("output.log")
-	if err != nil {
-		panic(err)
+	// Load configuration
+	cfg := config.Load()
+
+	// Setup logger with configured log level
+	if err := config.SetupLogger(cfg); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to set up logger: %v\n", err)
+		os.Exit(1)
 	}
-	defer log.Close()
-	slog.SetDefault(slog.New(slog.NewTextHandler(log, &slog.HandlerOptions{})))
+
+	slog.Info("starting cli application", "logLevel", cfg.LogLevel)
 
 	model, err := tui.NewModel(lipgloss.DefaultRenderer(), nil, []string{})
 	if err != nil {
-		panic(err)
+		slog.Error("Failed to create TUI model", "error", err)
+		os.Exit(1)
 	}
+
 	if _, err := tea.NewProgram(model, tea.WithAltScreen()).Run(); err != nil {
-		fmt.Println("Error running program:", err)
+		slog.Error("Error running program", "error", err)
 		os.Exit(1)
 	}
 }
