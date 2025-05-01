@@ -13,20 +13,22 @@ func (m model) MenuView() string {
 	render := m.theme.Base().Render
 
 	var renderedMenu []string
-	for i, item := range m.pages {
+	for i, page := range m.pages {
 		cursor := " " // no cursor
+		title := page.title
+
 		if i == m.cursor {
 			cursor = ">" // cursor for the selected item
-			item = bold(item)
+			title = bold(title)
 		}
-		renderedMenu = append(renderedMenu, render(fmt.Sprintf("%s %s", cursor, item)))
+		renderedMenu = append(renderedMenu, render(fmt.Sprintf("%s %s", cursor, title)))
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Left, renderedMenu...)
 }
 
 // MenuUpdate handles menu-specific key events
-func MenuUpdate(m model, msg tea.Msg) (model, tea.Cmd) {
+func (m model) MenuUpdate(msg tea.Msg) (model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -39,13 +41,8 @@ func MenuUpdate(m model, msg tea.Msg) (model, tea.Cmd) {
 				m.cursor++
 			}
 		case "enter":
-			switch m.cursor {
-			case 0:
-				m.currentPage = page1
-			case 1:
-				m.currentPage = page2
-			case 2:
-				m.currentPage = page3
+			if m.cursor >= 0 && m.cursor < len(m.pages) {
+				m.currentPage = m.pages[m.cursor].id
 			}
 		}
 	}

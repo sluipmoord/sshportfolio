@@ -4,22 +4,33 @@ import (
 	"context"
 	"log/slog"
 	"math"
+	"os"
 
+	"github.com/charmbracelet/glamour"
 	"github.com/sluipmoord/sshportfolio/pkg/tui/theme"
 
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
-type page = int
+// page represents a content page in the application
+type page struct {
+	id      pageID
+	title   string
+	content func(m model) string
+}
+
+type pageID = int
 type cursor = int
 type size = int
 
 const (
-	menuPage page = iota
+	menuPage pageID = iota
 	page1
 	page2
 	page3
+	readmePage
 )
 
 const (
@@ -51,10 +62,13 @@ type model struct {
 	heightContent   int
 	size            size
 
-	currentPage page
-	pages       []string
+	currentPage pageID
+	pages       []page
 
 	cursor cursor
+
+	// Viewport for scrollable content
+	readmeViewport viewport.Model
 }
 
 func NewModel(
@@ -65,19 +79,89 @@ func NewModel(
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, clientIPKey, clientIP)
 
+	// Create pages with titles and content functions
+	pages := []page{
+		{id: page1, title: "About Me", content: func(m model) string {
+			return m.theme.Base().Render("This is the content of Page 1")
+		}},
+		{id: page2, title: "Projects", content: func(m model) string {
+			return m.theme.Base().Render("This is the content of Page 2")
+		}},
+		{id: page3, title: "Skills", content: func(m model) string {
+			return m.theme.Base().Render("This is the content of Page 3")
+		}},
+		{id: readmePage, title: "README", content: func(m model) string {
+			return m.ReadmeView()
+		}},
+	}
+
 	return model{
 		renderer:    renderer,
 		context:     ctx,
 		command:     command,
 		cursor:      0,
 		currentPage: menuPage,
-		pages:       []string{"Page 1", "Page 2", "Page 3"},
+		pages:       pages,
 		theme:       theme.BasicTheme(renderer, nil),
 	}, nil
 }
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return tea.Batch(
+		loadReadmeContent(), // Command to load README content
+	)
+}
+
+// Message type for README content
+type readmeContentMsg struct {
+	content string
+	err     error
+}
+
+// Command to load README content
+func loadReadmeContent() tea.Cmd {
+	return func() tea.Msg {
+		// Try multiple possible locations for README.md
+		possiblePaths := []string{
+			"README.md",          // Current directory
+			"./README.md",        // Explicit current directory
+			"../README.md",       // Parent directory
+			"../../README.md",    // Two levels up
+			"../../../README.md", // Three levels up
+		}
+
+		var content []byte
+		var err error
+		var foundPath string
+
+		for _, path := range possiblePaths {
+			content, err = os.ReadFile(path)
+			if err == nil {
+				foundPath = path
+				slog.Debug("README found", "path", path)
+				break
+			}
+		}
+
+		if err != nil {
+			return readmeContentMsg{
+				err: err,
+			}
+		}
+
+		out, err := glamour.Render(string(content), "dark")
+		if err != nil {
+			slog.Error("Error rendering README", "error", err, "path", foundPath)
+			return readmeContentMsg{
+				err: err,
+			}
+		}
+
+		return readmeContentMsg{
+			content: out,
+			err:     nil,
+		}
+	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -85,6 +169,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	cmds := []tea.Cmd{}
 	switch msg := msg.(type) {
+	case readmeContentMsg:
+		// Initialize viewport with README content when it's loaded
+		if msg.err == nil {
+			vp := viewport.New(m.widthContent, m.heightContent)
+			vp.SetContent(msg.content)
+			m.readmeViewport = vp
+		}
+
 	case tea.WindowSizeMsg:
 		m.viewportWidth = msg.Width
 		m.viewportHeight = msg.Height
@@ -110,7 +202,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		m.widthContent = m.widthContainer - 2
 		m.heightContent = m.heightContainer - lipgloss.Height(m.HeaderView()) - lipgloss.Height(m.FooterView()) - 2
+
+		// Update the viewport size if it's initialized
+		if m.readmeViewport.Height > 0 {
+			m.readmeViewport.Width = m.widthContent
+			m.readmeViewport.Height = m.heightContent
+		}
+
 	case tea.KeyMsg:
+		// Handle scrolling when on the README page
+
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
@@ -125,7 +226,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch m.currentPage {
 	case menuPage:
-		m, cmd = MenuUpdate(m, msg)
+		m, cmd = m.MenuUpdate(msg)
+	case readmePage:
+		m, cmd = m.ReadmeUpdate(msg)
 	}
 
 	cmds = append(cmds, cmd)
@@ -141,7 +244,7 @@ func (m model) View() string {
 	switch m.currentPage {
 	case menuPage:
 		items = append(items, m.MenuView())
-	case page1, page2, page3:
+	case page1, page2, page3, readmePage:
 		items = append(items, m.PageView())
 	}
 

@@ -46,3 +46,16 @@ use Wish as the SSH server framework
     [optional body] 
     [optional footer(s)]
   ```
+
+## Code Style Guidelines
+
+- **Imports**: Standard library first, followed by external dependencies, then local packages
+- **Types**: Define types at the top of files, use custom structs for domain models
+- **Naming**: PascalCase for exported identifiers, camelCase for private
+- **Error Handling**: Explicit error returns with context, central error display mechanism
+- **Modules**: Organized by logical domain (api, tui, resource)
+- **Testing**: `_test.go` files with context-based testing
+- **Documentation**: Use Go doc comments for public functions and types
+- **UI Components**: Composition-based Bubble Tea components with Model-View pattern
+- **Formatting**: Standard Go formatting with `go fmt`
+  

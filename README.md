@@ -36,6 +36,12 @@ For testing and development, you can run the application as a local CLI without 
 go run ./cmd/cli/main.go
 ```
 
+Or use the Makefile:
+
+```bash
+make run-cli
+```
+
 ### SSH Server Mode
 
 1. Generate an SSH key pair if you don't already have one:
@@ -49,6 +55,12 @@ go run ./cmd/cli/main.go
 
    ```bash
    go run ./cmd/ssh/main.go
+   ```
+
+   Or use the Makefile:
+
+   ```bash
+   make run-ssh
    ```
 
 3. Connect to the SSH server using any SSH client:
@@ -108,6 +120,67 @@ This project supports hot-reloading using [Air](https://github.com/cosmtrek/air)
 
 The Air configuration in `.air.toml` is set up to rebuild and restart the SSH server when code changes are detected.
 
+## Terminal UI Components
+
+The application features a TUI built with Bubbletea and includes the following pages:
+
+- **Menu Page**: Navigation hub for accessing all other sections
+- **About Me**: Personal information and introduction
+- **Projects**: Showcase of your development projects
+- **Skills**: List of technical skills and competencies
+- **README**: Interactive display of this README.md file with proper Markdown rendering
+
+Navigation controls:
+
+- Arrow keys or `j`/`k` to navigate menus
+- `Enter` to select
+- `Esc` to go back to menu
+- `q` or `Ctrl+C` to quit
+- For README and other content pages with scrolling:
+  - Arrow keys, `Page Up`/`Page Down`, or mouse wheel to scroll
+
+## Embedded Assets
+
+The project includes an assets package (`pkg/assets`) that manages embedded resources using Go's embed directive. This allows you to:
+
+1. Include static assets (like SVG icons, images, and style files) directly in the binary
+2. Access these resources efficiently at runtime without external file dependencies
+
+To add new assets:
+
+1. Place the file in the `pkg/assets/embedded/` directory
+2. The `assets.go` file automatically handles embedding these resources
+3. Access them in your code through the assets package API
+
+## Customizing Your Portfolio
+
+To personalize this portfolio for your own use:
+
+1. **Update the About Me Page**: Modify the content function in `pkg/tui/root.go` for the About Me page to include your personal information.
+
+2. **Projects Section**: Edit the Projects page content to showcase your own work.
+
+3. **Skills Display**: Customize the Skills page to reflect your technical capabilities.
+
+4. **Theme Customization**: Modify the theme settings in `pkg/tui/theme/theme.go` to match your preferred color scheme and styling.
+
+5. **Embedded Assets**: Replace or add custom icons and images in the `pkg/assets/embedded/` directory.
+
+## Testing
+
+The project includes a comprehensive test suite:
+
+```bash
+# Run all tests
+make test
+```
+
+Test files are located in the `tests/` directory and cover:
+
+- Configuration validation and loading
+- TUI component rendering and behavior
+- Integration tests for SSH server functionality
+
 ## Code Quality
 
 The project follows Go best practices to ensure code quality:
@@ -126,15 +199,22 @@ The project follows Go best practices to ensure code quality:
 - **TUI Package** (`pkg/tui/`): Shared terminal UI components used by both applications
 - **Config Package** (`pkg/config/`): Shared configuration and logging setup
 - **Theme Package** (`pkg/tui/theme/`): Styling components for consistent visual appearance
+- **Assets Package** (`pkg/assets/`): Embedded resources management
 
 ### Project Structure
 
 - `README.md`: Project documentation
 - `go.mod` and `go.sum`: Dependency management files
+- `.github/`: GitHub-specific files (e.g., workflows, issue templates)
 - `cmd/`: Command applications
   - `cli/`: CLI application entry point
   - `ssh/`: SSH server entry point
 - `pkg/`: Reusable packages
+  - `assets/`: Embedded static assets
+    - `assets.go`: Asset loader
+    - `embedded/`: Static assets directory
+      - `embedded.go`: Embedding declaration
+      - `github.svg`: Example SVG icon
   - `config/`: Configuration and logging setup
     - `config.go`: Configuration loading and logger setup
   - `tui/`: Terminal UI components
@@ -152,6 +232,25 @@ The project follows Go best practices to ensure code quality:
   - `tui_test.go`: Tests for TUI components
 - `Makefile`: Build and development commands
 
+## Makefile Commands
+
+The project includes a Makefile with several useful commands:
+
+```bash
+make test         run all tests
+make test/cover   run all tests and display coverage
+make develop      run all tests and start the server
+make cli          run the CLI
+make build        build the server
+make build/cli    build the CLI
+make run          run the server
+make run/cli      run the CLI
+make clean        remove build artifacts
+make tidy         format code and tidy modfile
+make audit        run quality control checks
+make help         print this help message
+```
+
 ## Dependencies
 
 This project uses several libraries from the [Charm](https://charm.sh) ecosystem:
@@ -160,6 +259,7 @@ This project uses several libraries from the [Charm](https://charm.sh) ecosystem
 - [Lipgloss](https://github.com/charmbracelet/lipgloss): Style definitions for terminal applications
 - [Wish](https://github.com/charmbracelet/wish): SSH server framework
 - [Huh](https://github.com/charmbracelet/huh): Form/input components
+- [Glamour](https://github.com/charmbracelet/glamour): Markdown rendering
 
 ## License
 
