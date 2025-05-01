@@ -47,4 +47,3 @@ use Wish as the SSH server framework
     [optional body] 
     [optional footer(s)]
   ```
-  

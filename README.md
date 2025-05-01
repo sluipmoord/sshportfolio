@@ -1,8 +1,6 @@
 # SSH Portfolio
 
-[![Go](https://img.shields.io/badge/Language-Go-blue)](https://golang.org)
-[![Bubbletea](https://img.shields.io/badge/Framework-Bubbletea-green)](https://github.com/charmbracelet/bubbletea)
-[![Wish](https://img.shields.io/badge/Framework-Wish-orange)](https://github.com/charmbracelet/wish)
+[![Go](https://img.shields.io/badge/Language-Go-blue?logo=go&logoColor=white&label=Go%20v1.20)](https://golang.org) [![Bubbletea](https://img.shields.io/badge/Framework-Bubbletea-green)](https://github.com/charmbracelet/bubbletea) [![Wish](https://img.shields.io/badge/Framework-Wish-orange)](https://github.com/charmbracelet/wish)
 
 A SSH server built with Go (Golang) and Wish to serve as a personal portfolio that showcases projects and skills.
 
@@ -42,6 +40,21 @@ A SSH server built with Go (Golang) and Wish to serve as a personal portfolio th
    ```
 
    Replace `localhost` with the server's address if running on a remote machine.
+
+## Build Configuration
+
+This project uses `.air.toml` for build automation and configuration. The `.air.toml` file includes settings for:
+
+- Build commands and output paths.
+- File and directory exclusions during the build process.
+- Logging and screen settings for build operations.
+
+To build the project, you can use the following command:
+
+```bash
+# Build the project using the configuration in .air.toml
+go build -o ./tmp/main .
+```
 
 ## Project Structure
 
