@@ -39,7 +39,7 @@ go run ./cmd/cli/main.go
 Or use the Makefile:
 
 ```bash
-make run-cli
+make run/cli
 ```
 
 ### SSH Server Mode
@@ -60,7 +60,7 @@ make run-cli
    Or use the Makefile:
 
    ```bash
-   make run-ssh
+   make run
    ```
 
 3. Connect to the SSH server using any SSH client:

@@ -27,7 +27,7 @@ type size = int
 
 const (
 	menuPage pageID = iota
-	page1
+	aboutMe
 	page2
 	page3
 	readmePage
@@ -68,7 +68,7 @@ type model struct {
 	cursor cursor
 
 	// Viewport for scrollable content
-	readmeViewport viewport.Model
+	viewports map[pageID]viewport.Model
 }
 
 func NewModel(
@@ -81,8 +81,8 @@ func NewModel(
 
 	// Create pages with titles and content functions
 	pages := []page{
-		{id: page1, title: "About Me", content: func(m model) string {
-			return m.theme.Base().Render("This is the content of Page 1")
+		{id: aboutMe, title: "About Me", content: func(m model) string {
+			return m.AboutMeView()
 		}},
 		{id: page2, title: "Projects", content: func(m model) string {
 			return m.theme.Base().Render("This is the content of Page 2")
@@ -103,6 +103,7 @@ func NewModel(
 		currentPage: menuPage,
 		pages:       pages,
 		theme:       theme.BasicTheme(renderer, nil),
+		viewports:   make(map[pageID]viewport.Model),
 	}, nil
 }
 
@@ -113,7 +114,7 @@ func (m model) Init() tea.Cmd {
 }
 
 // Message type for README content
-type readmeContentMsg struct {
+type scrollContentMsg struct {
 	content string
 	err     error
 }
@@ -144,7 +145,7 @@ func loadReadmeContent() tea.Cmd {
 		}
 
 		if err != nil {
-			return readmeContentMsg{
+			return scrollContentMsg{
 				err: err,
 			}
 		}
@@ -152,12 +153,12 @@ func loadReadmeContent() tea.Cmd {
 		out, err := glamour.Render(string(content), "dark")
 		if err != nil {
 			slog.Error("Error rendering README", "error", err, "path", foundPath)
-			return readmeContentMsg{
+			return scrollContentMsg{
 				err: err,
 			}
 		}
 
-		return readmeContentMsg{
+		return scrollContentMsg{
 			content: out,
 			err:     nil,
 		}
@@ -169,12 +170,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	cmds := []tea.Cmd{}
 	switch msg := msg.(type) {
-	case readmeContentMsg:
+	case scrollContentMsg:
 		// Initialize viewport with README content when it's loaded
+		slog.Debug("README content loaded", "error", msg.err)
 		if msg.err == nil {
 			vp := viewport.New(m.widthContent, m.heightContent)
 			vp.SetContent(msg.content)
-			m.readmeViewport = vp
+			m.viewports[readmePage] = vp
 		}
 
 	case tea.WindowSizeMsg:
@@ -203,20 +205,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.widthContent = m.widthContainer - 2
 		m.heightContent = m.heightContainer - lipgloss.Height(m.HeaderView()) - lipgloss.Height(m.FooterView()) - 2
 
-		// Update the viewport size if it's initialized
-		if m.readmeViewport.Height > 0 {
-			m.readmeViewport.Width = m.widthContent
-			m.readmeViewport.Height = m.heightContent
+		// Update all viewport sizes
+		for pageID, vp := range m.viewports {
+			vp.Width = m.widthContent
+			vp.Height = m.heightContent
+			m.viewports[pageID] = vp
 		}
 
 	case tea.KeyMsg:
-		// Handle scrolling when on the README page
-
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "esc":
-			//  back to menu
+			// Back to menu
 			m.currentPage = menuPage
 			m.cursor = 0
 			return m, nil
@@ -227,6 +228,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.currentPage {
 	case menuPage:
 		m, cmd = m.MenuUpdate(msg)
+	case aboutMe:
+		m, cmd = m.AboutMeUpdate(msg)
+	case page2:
+		m, cmd = m.PageUpdate(page2, msg)
+	case page3:
+		m, cmd = m.PageUpdate(page3, msg)
 	case readmePage:
 		m, cmd = m.ReadmeUpdate(msg)
 	}
@@ -244,7 +251,7 @@ func (m model) View() string {
 	switch m.currentPage {
 	case menuPage:
 		items = append(items, m.MenuView())
-	case page1, page2, page3, readmePage:
+	case aboutMe, page2, page3, readmePage:
 		items = append(items, m.PageView())
 	}
 

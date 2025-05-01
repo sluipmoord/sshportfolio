@@ -42,7 +42,13 @@ func (m model) MenuUpdate(msg tea.Msg) (model, tea.Cmd) {
 			}
 		case "enter":
 			if m.cursor >= 0 && m.cursor < len(m.pages) {
-				m.currentPage = m.pages[m.cursor].id
+				selectedPageID := m.pages[m.cursor].id
+				m.currentPage = selectedPageID
+
+				// If we don't have a viewport for this page yet, initialize one
+				if _, ok := m.viewports[selectedPageID]; !ok {
+					return m, m.InitializeViewport(selectedPageID)
+				}
 			}
 		}
 	}
