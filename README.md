@@ -1,8 +1,8 @@
 # SSH Portfolio
 
-[![Go](https://img.shields.io/badge/Language-Go-blue?logo=go&logoColor=white&label=Go%20v1.20)](https://golang.org) [![Bubbletea](https://img.shields.io/badge/Framework-Bubbletea-green)](https://github.com/charmbracelet/bubbletea) [![Wish](https://img.shields.io/badge/Framework-Wish-orange)](https://github.com/charmbracelet/wish)
+[![Go](https://img.shields.io/badge/Language-Go-blue?logo=go&logoColor=white&label=Go%20v1.23)](https://golang.org) [![Bubbletea](https://img.shields.io/badge/Framework-Bubbletea-green)](https://github.com/charmbracelet/bubbletea) [![Wish](https://img.shields.io/badge/Framework-Wish-orange)](https://github.com/charmbracelet/wish)
 
-A SSH server built with Go (Golang) and Wish to serve as a personal portfolio that showcases projects and skills.
+A SSH server built with Go (Golang) and Wish to serve as a personal portfolio that showcases projects and skills. This project provides both a SSH server and a standalone CLI application, both using the same TUI (Terminal User Interface) components.
 
 ## Project Goals
 
@@ -11,63 +11,102 @@ A SSH server built with Go (Golang) and Wish to serve as a personal portfolio th
 
 ## Getting Started
 
-1. Ensure you have Go installed on your system.
-2. Run the following command to execute the program:
+1. Ensure you have Go installed on your system (version 1.23 or later recommended).
+2. Clone this repository:
 
    ```bash
-   go run main.go
+   git clone https://github.com/yourusername/sshportfolio.git
+   cd sshportfolio
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   go mod download
    ```
 
 ## Running the Application
 
-1. Ensure you have Go installed on your system.
-2. Generate an SSH key pair if you don't already have one. You can do this by running:
+### CLI Mode (Local)
+
+For testing and development, you can run the application as a local CLI without SSH:
+
+```bash
+go run ./cmd/cli/main.go
+```
+
+### SSH Server Mode
+
+1. Generate an SSH key pair if you don't already have one:
 
    ```bash
+   mkdir -p .ssh
    ssh-keygen -t ed25519 -f .ssh/id_ed25519
    ```
 
-3. Start the SSH server by running:
+2. Start the SSH server:
 
    ```bash
-   go run main.go
+   go run ./cmd/ssh/main.go
    ```
 
-4. Connect to the SSH server using an SSH client. For example:
+3. Connect to the SSH server using any SSH client:
 
    ```bash
    ssh -p 42069 localhost
    ```
 
-   Replace `localhost` with the server's address if running on a remote machine.
+## Development with Air
 
-## Build Configuration
+This project supports hot-reloading using [Air](https://github.com/cosmtrek/air). To use it:
 
-This project uses `.air.toml` for build automation and configuration. The `.air.toml` file includes settings for:
+1. Install Air:
 
-- Build commands and output paths.
-- File and directory exclusions during the build process.
-- Logging and screen settings for build operations.
+   ```bash
+   go install github.com/cosmtrek/air@latest
+   ```
 
-To build the project, you can use the following command:
+2. Run the SSH server with hot reloading:
 
-```bash
-# Build the project using the configuration in .air.toml
-go build -o ./tmp/main .
-```
+   ```bash
+   air
+   ```
 
-## Project Structure
+The Air configuration in `.air.toml` is set up to rebuild and restart the SSH server when code changes are detected.
 
-- `README.md`: Project documentation.
-- `main.go`: Entry point of the application.
-- `go.mod` and `go.sum`: Dependency management files.
-- `pkg/`: Directory for reusable packages and libraries.
-  - `tui/`: Contains the TUI (Text User Interface) implementation.
-    - `model.go`: Core logic for the TUI.
-- `tests/`: Directory for test files.
-  - `tui_test.go`: Tests for the TUI package.
-- `.github/`: Directory for GitHub-specific configurations.
-  - `workflows/`: Contains GitHub Actions workflow files.
+## Project Architecture
+
+### Components
+
+- **SSH Server** (`cmd/ssh/main.go`): Provides portfolio access via SSH
+- **CLI Application** (`cmd/cli/main.go`): Local terminal interface for the portfolio
+- **TUI Package** (`pkg/tui/`): Shared terminal UI components used by both applications
+- **Theme Package** (`pkg/tui/theme/`): Styling components for consistent visual appearance
+
+### Project Structure
+
+- `README.md`: Project documentation
+- `go.mod` and `go.sum`: Dependency management files
+- `cmd/`: Command applications
+  - `cli/`: CLI application entry point
+  - `ssh/`: SSH server entry point
+- `pkg/`: Reusable packages
+  - `tui/`: Terminal UI components
+    - `root.go`: Main TUI model and view logic
+    - `theme/`: UI styling components
+      - `theme.go`: Theme definition and style utilities
+      - `huh.go`: Form styling utilities
+- `tests/`: Test files
+- `.air.toml`: Configuration for the Air hot-reload tool
+
+## Dependencies
+
+This project uses several libraries from the [Charm](https://charm.sh) ecosystem:
+
+- [Bubbletea](https://github.com/charmbracelet/bubbletea): TUI framework
+- [Lipgloss](https://github.com/charmbracelet/lipgloss): Style definitions for terminal applications
+- [Wish](https://github.com/charmbracelet/wish): SSH server framework
+- [Huh](https://github.com/charmbracelet/huh): Form/input components
 
 ## License
 
