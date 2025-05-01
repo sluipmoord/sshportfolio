@@ -2,13 +2,24 @@
 
 [![Go](https://img.shields.io/badge/Language-Go-blue?logo=go&logoColor=white&label=Go%20v1.23)](https://golang.org) [![Bubbletea](https://img.shields.io/badge/Framework-Bubbletea-green)](https://github.com/charmbracelet/bubbletea) [![Wish](https://img.shields.io/badge/Framework-Wish-orange)](https://github.com/charmbracelet/wish)
 
-A SSH server built with Go (Golang) and Wish to serve as a personal portfolio that showcases projects and skills. This project provides both a SSH server and a standalone CLI application, both using the same TUI (Terminal User Interface) components.
+A SSH server built with Go (Golang) and Wish to serve as a personal portfolio that showcases projects and skills. This project provides both a SSH server and a standalone CLI application, both using the same TUI (Terminal User Interface) components built with Bubbletea.
 
 ## Project Goals
 
-- Showcase projects and skills effectively.
-- Ensure the server is robust and user-friendly.
-- Maintain high code quality with Go best practices.
+- Showcase projects and skills effectively in an interactive terminal environment
+- Provide a unique and memorable way to present your professional portfolio
+- Ensure the server is robust, secure, and user-friendly
+- Maintain high code quality with Go best practices
+
+## Features
+
+- **Interactive TUI**: Navigate through different sections using keyboard controls
+- **Responsive Design**: Adjusts to different terminal sizes
+- **Markdown Rendering**: Beautifully renders markdown content
+- **Dual Mode**: Run as SSH server or local CLI application
+- **Customizable**: Easy to update with your own content
+- **Embedded Assets**: All resources bundled into a single binary
+- **Themeable**: Customize colors and styles to match your preferences
 
 ## Getting Started
 
@@ -137,7 +148,10 @@ Navigation controls:
 - `Esc` to go back to menu
 - `q` or `Ctrl+C` to quit
 - For README and other content pages with scrolling:
-  - Arrow keys, `Page Up`/`Page Down`, or mouse wheel to scroll
+  - `↑`/`↓` or `j`/`k`: Scroll up/down one line
+  - `PgUp`/`PgDn` or `u`/`d`: Scroll page up/down
+  - `Home`/`g` or `End`/`G`: Go to top/bottom
+  - `f`/`b`: Forward/backward one page
 
 ## Embedded Assets
 
@@ -156,7 +170,7 @@ To add new assets:
 
 To personalize this portfolio for your own use:
 
-1. **Update the About Me Page**: Modify the content function in `pkg/tui/root.go` for the About Me page to include your personal information.
+1. **Update the About Me Page**: Edit `pkg/assets/embedded/about.md` with your information.
 
 2. **Projects Section**: Edit the Projects page content to showcase your own work.
 
@@ -173,6 +187,9 @@ The project includes a comprehensive test suite:
 ```bash
 # Run all tests
 make test
+
+# Run tests with coverage report
+make test/cover
 ```
 
 Test files are located in the `tests/` directory and cover:
@@ -214,6 +231,7 @@ The project follows Go best practices to ensure code quality:
     - `assets.go`: Asset loader
     - `embedded/`: Static assets directory
       - `embedded.go`: Embedding declaration
+      - `about.md`: About me content
       - `github.svg`: Example SVG icon
   - `config/`: Configuration and logging setup
     - `config.go`: Configuration loading and logger setup
@@ -222,7 +240,7 @@ The project follows Go best practices to ensure code quality:
     - `footer.go`: Footer components
     - `header.go`: Header components
     - `menu.go`: Menu navigation components
-    - `pages.go`: Content pages
+    - `pages.go`: Content pages with viewport management
     - `theme/`: UI styling components
       - `theme.go`: Theme definition and style utilities
       - `huh.go`: Form styling utilities
@@ -260,7 +278,45 @@ This project uses several libraries from the [Charm](https://charm.sh) ecosystem
 - [Wish](https://github.com/charmbracelet/wish): SSH server framework
 - [Huh](https://github.com/charmbracelet/huh): Form/input components
 - [Glamour](https://github.com/charmbracelet/glamour): Markdown rendering
+- [Bubbles](https://github.com/charmbracelet/bubbles): Common UI components for Bubbletea
+
+## Deployment
+
+For production deployment, it's recommended to:
+
+1. Build the binary:
+
+   ```bash
+   make build
+   ```
+
+2. Set up as a systemd service or use a process manager like supervisord:
+
+   ```toml
+   [Unit]
+   Description=SSH Portfolio Service
+   After=network.target
+
+   [Service]
+   ExecStart=/path/to/bin/server -host 0.0.0.0 -port 22222
+   Restart=on-failure
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+3. Set up proper firewall rules to allow access to your chosen SSH port
 
 ## License
 
 This project is licensed under the MIT License.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
