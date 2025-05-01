@@ -1,6 +1,15 @@
-# sshgleamthing
+# SSH Portfolio
 
-This is a clean Go (Golang) project.
+[![Go](https://img.shields.io/badge/Language-Go-blue)](https://golang.org)
+[![Bubbletea](https://img.shields.io/badge/Framework-Bubbletea-green)](https://github.com/charmbracelet/bubbletea)
+[![Wish](https://img.shields.io/badge/Framework-Wish-orange)](https://github.com/charmbracelet/wish)
+
+A SSH server built with Go (Golang) and Wish to serve as a personal portfolio that showcases projects and skills.
+
+## Project Goals
+
+- Showcase projects and skills effectively.
+- Ensure the server is robust and user-friendly.
 
 ## Getting Started
 
@@ -36,8 +45,16 @@ This is a clean Go (Golang) project.
 
 ## Project Structure
 
+- `README.md`: Project documentation.
 - `main.go`: Entry point of the application.
-- `.github/copilot-instructions.md`: Workspace-specific instructions for Copilot.
+- `go.mod` and `go.sum`: Dependency management files.
+- `pkg/`: Directory for reusable packages and libraries.
+  - `tui/`: Contains the TUI (Text User Interface) implementation.
+    - `model.go`: Core logic for the TUI.
+- `tests/`: Directory for test files.
+  - `tui_test.go`: Tests for the TUI package.
+- `.github/`: Directory for GitHub-specific configurations.
+  - `workflows/`: Contains GitHub Actions workflow files.
 
 ## License
 

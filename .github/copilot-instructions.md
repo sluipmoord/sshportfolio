@@ -29,3 +29,22 @@ use Wish as the SSH server framework
 - `tests/`: Directory for test files.
 - `docs/`: Directory for documentation files.
 - `scripts/`: Directory for scripts and automation.
+
+## Commit Message Generation
+
+- Use conventional commit message format.
+- Use imperative mood.
+- Use present tense.
+- Use lowercase letters.
+- Use a short summary.
+- Use a body to explain the changes.
+- Use bullet points for multiple changes.
+- Use a footer for breaking changes.
+- Always the format
+
+  ```bash
+    <type>[optional scope]: <description> 
+    [optional body] 
+    [optional footer(s)]
+  ```
+  
