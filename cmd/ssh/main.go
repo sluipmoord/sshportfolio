@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -12,6 +13,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/ssh"
 	"github.com/charmbracelet/wish"
+	"github.com/charmbracelet/wish/activeterm"
+	"github.com/charmbracelet/wish/bubbletea"
 	"github.com/charmbracelet/wish/logging"
 )
 
@@ -20,31 +23,53 @@ const (
 	port = "42069"
 )
 
-func portfolioMiddleware(pages []string) wish.Middleware {
-	return func(handler ssh.Handler) ssh.Handler {
-		return func(s ssh.Session) {
-			p := tea.NewProgram(tui.Portfolio{Pages: pages}, tea.WithInput(s), tea.WithOutput(s))
-			if _, err := p.Run(); err != nil {
-				log.Printf("Error starting TUI: %v", err)
-			}
-			handler(s)
-		}
+type sshOutput struct {
+	ssh.Session
+	tty *os.File
+}
+
+func (s *sshOutput) Write(p []byte) (int, error) {
+	return s.Session.Write(p)
+}
+
+func (s *sshOutput) Read(p []byte) (int, error) {
+	return s.Session.Read(p)
+}
+
+func (s *sshOutput) Fd() uintptr {
+	return s.tty.Fd()
+}
+
+func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
+	pty, _, _ := s.Pty()
+	sessionBridge := &sshOutput{
+		Session: s,
+		tty:     pty.Slave,
 	}
+	renderer := bubbletea.MakeRenderer(sessionBridge)
+	command := s.Command()
+
+	// Get client IP address from the SSH session
+	clientAddr := s.RemoteAddr().String()
+	host, _, _ := net.SplitHostPort(clientAddr)
+	slog.Info("client connected", "ip", host)
+
+	model, err := tui.NewModel(renderer, &host, command)
+	if err != nil {
+		return nil, []tea.ProgramOption{}
+	}
+	return model, []tea.ProgramOption{tea.WithAltScreen()}
 }
 
 func main() {
-	pages := []string{
-		"Hello",
-		"About",
-		"Projects",
-	}
 
 	server, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort(host, port)),
 		wish.WithHostKeyPath(".ssh/id_ed25519"),
 		wish.WithMiddleware(
 			logging.Middleware(),
-			portfolioMiddleware(pages),
+			activeterm.Middleware(),
+			bubbletea.Middleware(teaHandler),
 		),
 	)
 	if err != nil {
