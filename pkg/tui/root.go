@@ -100,7 +100,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.widthContent = m.widthContainer - 2
-		m.heightContent = m.heightContainer - lipgloss.Height(HeaderView(m)) - lipgloss.Height(FooterView(m)) - 2
+		m.heightContent = m.heightContainer - lipgloss.Height(m.HeaderView()) - lipgloss.Height(m.FooterView()) - 2
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
@@ -126,17 +126,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	items := []string{}
-	header := HeaderView(m)
+	header := m.HeaderView()
 	items = append(items, header)
 
 	switch m.currentPage {
 	case menuPage:
-		items = append(items, MenuView(m))
+		items = append(items, m.MenuView())
 	case page1, page2, page3:
-		items = append(items, PageView(m))
+		items = append(items, m.PageView())
 	}
 
-	footer := FooterView(m)
+	footer := m.FooterView()
 
 	items = append(items, footer)
 

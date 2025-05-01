@@ -5,7 +5,7 @@ import (
 )
 
 // FooterView renders the footer of the application with navigation hints
-func FooterView(m model) string {
+func (m model) FooterView() string {
 	bold := m.theme.TextAccent().Bold(true).Render
 	base := m.theme.Base().Render
 

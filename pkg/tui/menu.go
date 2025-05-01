@@ -8,7 +8,7 @@ import (
 )
 
 // MenuView renders the menu with selectable options
-func MenuView(m model) string {
+func (m model) MenuView() string {
 	bold := m.theme.TextAccent().Bold(true).Render
 	render := m.theme.Base().Render
 

@@ -13,11 +13,10 @@ use Wish as the SSH server framework
 
 ## Documentation Updates
 
-- Always update the docs and readme file with the latest changes
+- Always update the docs and README.md file with the latest changes
 
 ## Project Structure
 
-- `README.md`: Project documentation.
 - `main.go`: Entry point of the application.
 - `.github/copilot-instructions.md`: Workspace-specific instructions for Copilot.
 - `README.md`: Project documentation.

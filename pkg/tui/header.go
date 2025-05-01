@@ -5,7 +5,7 @@ import (
 )
 
 // HeaderView renders the header of the application
-func HeaderView(m model) string {
+func (m model) HeaderView() string {
 	bold := m.theme.TextAccent().Bold(true).Render
 	base := m.theme.Base().Render
 
