@@ -2,7 +2,6 @@ package tui
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"math"
 	"sshportfolio/pkg/tui/theme"
@@ -16,7 +15,7 @@ type cursor = int
 type size = int
 
 const (
-	menu page = iota
+	menuPage page = iota
 	page1
 	page2
 	page3
@@ -43,8 +42,8 @@ type model struct {
 	heightContent   int
 	size            size
 
-	page  page
-	pages []string
+	currentPage page
+	pages       []string
 
 	cursor cursor
 }
@@ -58,13 +57,13 @@ func NewModel(
 	ctx = context.WithValue(ctx, "client_ip", clientIP)
 
 	return model{
-		renderer: renderer,
-		context:  ctx,
-		command:  command,
-		cursor:   0,
-		page:     menu,
-		pages:    []string{"Page 1", "Page 2", "Page 3"},
-		theme:    theme.BasicTheme(renderer, nil),
+		renderer:    renderer,
+		context:     ctx,
+		command:     command,
+		cursor:      0,
+		currentPage: menuPage,
+		pages:       []string{"Page 1", "Page 2", "Page 3"},
+		theme:       theme.BasicTheme(renderer, nil),
 	}, nil
 }
 
@@ -101,23 +100,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.widthContent = m.widthContainer - 2
-		m.heightContent = m.heightContainer - lipgloss.Height(m.HeaderView()) - lipgloss.Height(m.FooterView()) - 2
+		m.heightContent = m.heightContainer - lipgloss.Height(HeaderView(m)) - lipgloss.Height(FooterView(m)) - 2
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "esc":
-			// Navigate back to the main page list
-			m.page = menu
+			//  back to menu
+			m.currentPage = menuPage
 			m.cursor = 0
 			return m, nil
 		}
 	}
 
 	var cmd tea.Cmd
-	switch m.page {
-	case menu:
-		m, cmd = m.MenuUpdate(msg)
+	switch m.currentPage {
+	case menuPage:
+		m, cmd = MenuUpdate(m, msg)
 	}
 
 	cmds = append(cmds, cmd)
@@ -127,16 +126,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	items := []string{}
-	header := m.HeaderView()
+	header := HeaderView(m)
 	items = append(items, header)
-	switch m.page {
-	case menu:
-		items = append(items, m.MenuView())
+
+	switch m.currentPage {
+	case menuPage:
+		items = append(items, MenuView(m))
 	case page1, page2, page3:
-		items = append(items, m.PageView())
+		items = append(items, PageView(m))
 	}
 
-	footer := m.FooterView()
+	footer := FooterView(m)
 
 	items = append(items, footer)
 
@@ -154,96 +154,4 @@ func (m model) View() string {
 			MaxHeight(m.heightContainer).
 			Render(child),
 	)
-}
-
-func (m model) HeaderView() string {
-	bold := m.theme.TextAccent().Bold(true).Render
-	base := m.theme.Base().Render
-
-	header := base("My Portfolio Page:")
-	header += bold(fmt.Sprintf(" %d", m.page))
-
-	return m.theme.Base().PaddingBottom(1).Render(header)
-}
-
-func (m model) FooterView() string {
-	bold := m.theme.TextAccent().Bold(true).Render
-	base := m.theme.Base().Render
-
-	esc := bold("q")
-	back := bold("esc")
-	footer := base(fmt.Sprintf("%s back | %s quit", back, esc))
-
-	return m.theme.Base().PaddingTop(1).Render(footer)
-}
-
-func (m model) MenuView() string {
-	bold := m.theme.TextAccent().Bold(true).Render
-	render := m.theme.Base().Render
-
-	var renderedMenu []string
-	for i, item := range m.pages {
-		cursor := " " // no cursor
-		if i == m.cursor {
-			cursor = ">" // cursor for the selected item
-			item = bold(item)
-		}
-		renderedMenu = append(renderedMenu, render(fmt.Sprintf("%s %s", cursor, item)))
-	}
-
-	return lipgloss.JoinVertical(lipgloss.Left, renderedMenu...)
-}
-
-func (m model) MenuUpdate(msg tea.Msg) (model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "up":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-		case "down":
-			if m.cursor < len(m.pages)-1 {
-				m.cursor++
-			}
-		case "enter":
-			switch m.cursor {
-			case 0:
-				m.page = page1
-			case 1:
-				m.page = page2
-			case 2:
-				m.page = page3
-			}
-		}
-	}
-
-	return m, nil
-}
-
-func (m model) PageView() string {
-
-	page := ""
-	switch m.page {
-	case page1:
-		page = m.Page1View()
-	case page2:
-		page = m.Page2View()
-	case page3:
-		page = m.Page3View()
-	default:
-		page = m.theme.Base().Render("Unknown page")
-	}
-
-	return page
-
-}
-func (m model) Page1View() string {
-	return m.theme.Base().Render("This is the content of Page 1")
-}
-func (m model) Page2View() string {
-	return m.theme.Base().Render("This is the content of Page 2")
-}
-func (m model) Page3View() string {
-	return m.theme.Base().Render("This is the content of Page 3")
 }
