@@ -8,6 +8,7 @@ A SSH server built with Go (Golang) and Wish to serve as a personal portfolio th
 
 - Showcase projects and skills effectively.
 - Ensure the server is robust and user-friendly.
+- Maintain high code quality with Go best practices.
 
 ## Getting Started
 
@@ -107,6 +108,15 @@ This project supports hot-reloading using [Air](https://github.com/cosmtrek/air)
 
 The Air configuration in `.air.toml` is set up to rebuild and restart the SSH server when code changes are detected.
 
+## Code Quality
+
+The project follows Go best practices to ensure code quality:
+
+- Custom types for context keys to prevent key collisions
+- Consistent error handling and logging
+- Comprehensive testing
+- Clean separation of concerns with a well-defined package structure
+
 ## Project Architecture
 
 ### Components
@@ -129,11 +139,18 @@ The Air configuration in `.air.toml` is set up to rebuild and restart the SSH se
     - `config.go`: Configuration loading and logger setup
   - `tui/`: Terminal UI components
     - `root.go`: Main TUI model and view logic
+    - `footer.go`: Footer components
+    - `header.go`: Header components
+    - `menu.go`: Menu navigation components
+    - `pages.go`: Content pages
     - `theme/`: UI styling components
       - `theme.go`: Theme definition and style utilities
       - `huh.go`: Form styling utilities
 - `tests/`: Test files
-- `.air.toml`: Configuration for the Air hot-reload tool
+  - `config_test.go`: Tests for configuration
+  - `main_test.go`: Main test entry point
+  - `tui_test.go`: Tests for TUI components
+- `Makefile`: Build and development commands
 
 ## Dependencies
 
